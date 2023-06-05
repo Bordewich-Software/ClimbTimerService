@@ -1,0 +1,17 @@
+*.user
+**/.vs
+**/bin
+**/obj
+**/TestResults
+**/.dist
+.idea
+*.log
+**/*.DotSettings
+
+.pack/
+.test-results/
+/tools/
+
+.test-coverage/
+
+.DS_Store
