@@ -15,13 +15,17 @@ services.AddCors(s =>
     {
         policyBuilder.WithOrigins(
                 "http://localhost:3000",
-                "https://localhost:3000")
+                "https://localhost:3000",
+                "http://localhost")
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
 });
 
-services.AddWebSockets(c => c.AllowedOrigins.Add("http://localhost:3000"));
+services.AddWebSockets(c => {
+    c.AllowedOrigins.Add("http://localhost:3000");
+    c.AllowedOrigins.Add("http://localhost");
+});
 
 services.AddGraphQLServer()
     .AddQueryType()

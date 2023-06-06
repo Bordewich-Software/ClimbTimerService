@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+
+  backend:
+    image: ghcr.io/bordewich-software/climb_timer_service:latest
+    ports:
+      - "8080:80"
+  
+  web:
+    image: ghcr.io/bordewich-software/climb_time:latest
+    ports:
+      - "80:3000"

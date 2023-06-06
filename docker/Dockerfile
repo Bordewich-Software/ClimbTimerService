@@ -15,12 +15,8 @@ RUN dotnet publish -c release -o /app --no-restore
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
 
-# Set env variables
-ARG owner
-ENV env_name $owner
-
 # Link repostitory
-LABEL org.opencontainers.image.source=https://github.com/${owner}/ClimbTimerService
+LABEL org.opencontainers.image.source=https://github.com/bordewich-software/ClimbTimerService
 LABEL org.opencontainers.image.description="ClimbTimer Backend Service"
 
 WORKDIR /app
