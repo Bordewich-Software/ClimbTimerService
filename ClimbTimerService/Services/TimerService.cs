@@ -10,12 +10,13 @@ public class TimerService
     private readonly ConcurrentDictionary<string, InternalStopWatch> _stopwatches = new();
     public List<string> CurrentStopwatchIds => _stopwatches.Keys.ToList();
 
-    public bool CreateNewStopwatch(string id)
+    public bool CreateNewStopwatch(string id, TimeSpan timeSpan)
     {
+        
         if (_stopwatches.ContainsKey(id))
             throw new StopwatchExistsException($"Stopwatch with Id {id}, already exists. Cannot create");
 
-        return _stopwatches.TryAdd(id, new InternalStopWatch(new Stopwatch(), TimerState.Stopped));
+        return _stopwatches.TryAdd(id, new InternalStopWatch(new Stopwatch(), TimerState.Stopped, timeSpan));
     }
 
     public bool RemoveStopwatch(string id)
@@ -27,9 +28,7 @@ public class TimerService
     {
         if (_stopwatches.TryGetValue(id, out var stw))
         {
-            stw.Stopwatch.Start();
-            stw.TimerState = TimerState.Started;
-            return stw.TimerState;
+            return stw.Start();
         }
         return TimerState.NotSet;
     }
@@ -38,9 +37,7 @@ public class TimerService
     {
         if (_stopwatches.TryGetValue(id, out var stw))
         {
-            stw.Stopwatch.Stop();
-            stw.TimerState = TimerState.Paused;
-            return stw.TimerState;
+            return stw.Pause();
         }
         return TimerState.NotSet;
     }
@@ -49,9 +46,7 @@ public class TimerService
     {
         if (_stopwatches.TryGetValue(id, out var stw))
         {
-            stw.Stopwatch.Reset();
-            stw.TimerState = TimerState.Stopped;
-            return stw.TimerState;
+            return stw.Reset();
         }
         return TimerState.NotSet;
     }
@@ -60,9 +55,7 @@ public class TimerService
     {
         if (_stopwatches.TryGetValue(id, out var stw))
         {
-            stw.Stopwatch.Restart();
-            stw.TimerState = TimerState.Started;
-            return stw.TimerState;
+            return stw.Restart();
         }
         
         return TimerState.NotSet;
@@ -72,7 +65,7 @@ public class TimerService
     {
         if (_stopwatches.TryGetValue(id, out var stw))
         {
-            return stw.TimerState == TimerState.Started ? Pause(id) : Start(id);;
+            return stw.Toggle();
         }
         
         return TimerState.NotSet;
@@ -81,22 +74,60 @@ public class TimerService
     public StopWatchState StopWatchState(string id)
     {
         if (_stopwatches.TryGetValue(id, out var stw))
-            return new StopWatchState(stw.Stopwatch.Elapsed.Minutes, stw.Stopwatch.Elapsed.Seconds, stw.TimerState);
-        
+            return stw.CalculateStopwatchState();
+
         return new StopWatchState(0, 0, TimerState.NotSet);
     }
 }
 
 public class InternalStopWatch
 {
-    public InternalStopWatch(Stopwatch stopwatch, TimerState timerState)
+    private Stopwatch Stopwatch { get; init; }
+    private TimerState TimerState { get; set; }
+    private TimeSpan EndTimeSpan { get; init; }
+    public InternalStopWatch(Stopwatch stopwatch, TimerState timerState, TimeSpan endTimeSpan)
     {
+        EndTimeSpan = endTimeSpan;
         Stopwatch = stopwatch;
         TimerState = timerState;
     }
 
-    public Stopwatch Stopwatch { get; set; }
-    public TimerState TimerState { get; set; }
+    public StopWatchState CalculateStopwatchState()
+    {
+        var s = EndTimeSpan.Subtract(Stopwatch.Elapsed);
+        if (s.TotalMilliseconds <= 0.0)
+        {
+            Stopwatch.Stop();
+            TimerState = TimerState.Stopped;
+            return new StopWatchState(0, 0, TimerState);
+        }
+            
+        return new StopWatchState(s.Minutes, s.Seconds, TimerState);
+    }
+
+    public TimerState Start() {
+        Stopwatch.Start();
+        TimerState = TimerState.Started;
+        return TimerState;
+    }
+    public TimerState Pause() {
+        Stopwatch.Stop();
+        TimerState = TimerState.Paused;
+        return TimerState;
+    }
+    public TimerState Reset() {
+        Stopwatch.Reset();
+        TimerState = TimerState.Stopped;
+        return TimerState;
+    }
+    public TimerState Restart() {
+        Stopwatch.Restart();
+        TimerState = TimerState.Started;
+        return TimerState;
+    }
+    public TimerState Toggle() {
+        return TimerState == TimerState.Started ? Pause() : Start();;
+    }
 }
 
 public enum TimerState
