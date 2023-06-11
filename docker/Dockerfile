@@ -10,7 +10,8 @@ RUN dotnet restore
 # copy everything else and build app
 COPY ClimbTimerService/. ./ClimbTimerService/
 WORKDIR /source/ClimbTimerService
-RUN dotnet publish -c release -o /app --no-restore
+# restore from previous step does not seem to work...
+RUN dotnet publish -c release -o /app
 
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0

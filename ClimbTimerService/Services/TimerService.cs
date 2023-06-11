@@ -13,7 +13,8 @@ public class TimerService
     public List<string> StopwatchIds => _stopwatches.Keys.ToList();
 
     public List<StopwatchConfig> StopwatchConfigs => _stopwatches.Select(c =>
-        new StopwatchConfig(c.Key, c.Value.Format, c.Value.End.Hours, c.Value.End.Minutes, c.Value.End.Seconds)).ToList();
+            new StopwatchConfig(c.Key, c.Value.Format, c.Value.End.Hours, c.Value.End.Minutes, c.Value.End.Seconds))
+        .ToList();
 
     public bool CreateNewStopwatch(string id, StopwatchFormat format, TimeSpan timeSpan)
     {
@@ -92,6 +93,13 @@ public class TimerService
             return stw.CalculateStopWatchState();
 
         return new StopWatchState(0, 0, 0, TimerState.NotSet);
+    }
+
+    public StopwatchConfig? StopwatchConfig(string id)
+    {
+        return _stopwatches.TryGetValue(id, out var stw)
+            ? new StopwatchConfig(id, stw.Format, stw.End.Hours, stw.End.Minutes, stw.End.Seconds)
+            : null;
     }
 }
 
