@@ -18,8 +18,9 @@ public class PeriodicEventPublisher: BackgroundService
     {
         while (!cancellationToken.IsCancellationRequested && await _timer.WaitForNextTickAsync(cancellationToken))
         {
-            foreach (var stopwatchId in _timerService.CurrentStopwatchIds)
+            foreach (var stopwatchId in _timerService.StopwatchIds)
             {
+                await _eventSender.SendAsync($"RemainingTime_{stopwatchId}", _timerService.RemainingStopWatchState(stopwatchId), cancellationToken);    
                 await _eventSender.SendAsync($"ElapsedTime_{stopwatchId}", _timerService.StopWatchState(stopwatchId), cancellationToken);    
             }
         }
