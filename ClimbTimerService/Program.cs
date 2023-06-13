@@ -16,7 +16,8 @@ services.AddCors(s =>
         policyBuilder.WithOrigins(
                 "http://localhost:3000",
                 "https://localhost:3000",
-                "http://localhost")
+                "http://localhost",
+                "http://bswmail.no")
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -25,6 +26,7 @@ services.AddCors(s =>
 services.AddWebSockets(c => {
     c.AllowedOrigins.Add("http://localhost:3000");
     c.AllowedOrigins.Add("http://localhost");
+    c.AllowedOrigins.Add("http://bswmail.no");
 });
 
 services.AddGraphQLServer()
