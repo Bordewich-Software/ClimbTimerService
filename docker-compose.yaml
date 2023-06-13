@@ -4,15 +4,10 @@ services:
 
   backend:
     image: ghcr.io/bordewich-software/climb_timer_service:latest
-    networks:
-      - backend
+    ports:
+      - "8080:80"
   
   web:
     image: ghcr.io/bordewich-software/climb_time:latest
     ports:
       - "80:3000"
-    networks:
-      - backend
-
-networks:
-  backend:
